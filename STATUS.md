@@ -52,6 +52,14 @@
 - 本地 `/home/czx/RLPD` 仍为 single source of truth；实例持久盘为二级备份
 - GitHub PAT 仅一次性使用（未写入 .git/config 或文件）；复现结束后建议撤销重建
 
+## 5.5 续训与自愈能力（10/18 凌晨追加，响应用户"开关实例不可避免"）
+
+- **断点续训**：train_finetuning.py / train_baselines.py 打补丁——启动时检测 `{log_dir}/{exp}/checkpoints` 的最新 ckpt（keep=20，每 5000 步一存）自动 restore 并从该步继续（已用崩溃 run 的 ckpt_125000 做隔离冒烟：`[resume] continue from step 125000` → 干净退出 exit=0）。注：在线 buffer 的已采部分不可恢复，恢复后仅含离线预灌（NB2 声明）
+- **主控守护 w2_master.sh**：每 5 分钟巡检，训练进程数为 0 且 36 个 run 未全部干净退出 → 自动重建未完成清单并以 4 路开新波次（崩溃自愈 + 波次衔接二合一，替代 w2_refeed.sh）；全部完成输出 W2_ALL_COMPLETE
+- **开机自拉起**：bootstrap_ts.sh 末尾追加幂等的 master 启动——实例重启后用户只需照常跑 bootstrap，训练自动恢复
+- **心跳自愈**：45min 心跳增加 master 存活检查，发现守护缺失自动重启（幂等）
+- 事故记录更新：3 次 segfault（23:32-23:58，GPU 扰动窗口）的 run 将由 master 在波次衔接时自动续训，不再整跑重跑
+
 ## 6. 待办
 
 **用户侧**
