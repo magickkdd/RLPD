@@ -57,3 +57,9 @@ fi
 echo "RECEIPT: IP=$IP UP_RC=$UP_RC $(date)" > $P/receipt.txt
 cat $P/receipt.txt
 echo BOOTSTRAP_DONE
+
+# 训练波次主控自拉起（幂等；master 内部有 0 进程才开波的保护）
+if ! pgrep -f w2_master.sh > /dev/null 2>&1; then
+  nohup setsid bash /mnt/workspace/w2_master.sh > /dev/null 2>&1 &
+  echo "W2_MASTER_STARTED"
+fi
