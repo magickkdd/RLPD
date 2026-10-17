@@ -3,6 +3,12 @@
 > 论文: Efficient Online Reinforcement Learning with Offline Data (Ball, Smith, Kostrikov, Levine; ICML 2023)
 > 代码: https://github.com/ikostrikov/rlpd (官方 JAX 实现)
 > 本文档为讨论基线，随讨论持续迭代。变更记录见文末。
+> **⚠️ v24 范围裁剪（2026-10-18 02:30，用户决策，额度约束触发）**
+> **新范围 = 主方法 RLPD + 部分任务**（P2 RLPD 4 任务×3 seeds + P3 antmaze-umaze×3，共 15 runs ≈ 15h）。
+   验收矩阵收缩：claim 1 保留（G2-1 绝对线 + G2-2 形状线，无需对照）；**claim 2（对称采样）/3（LN 消融）/5（CDQ）/6（Pixels）全部标"未复现（范围裁剪）"**；P4 冒烟已完成即关闭。原全文任务矩阵/预算仅在未裁剪部分生效。
+> 判据影响：不依赖对照的主判据照常执行；依赖对照/消融的判据标注 **"未复现（范围裁剪）"** 入 NB2。
+> 已完成资产保留：3 个 SACfD halfcheetah seeds（完整跑完，可作附录参考线）；续训体系见 RESUME.md §5.5。
+
 
 ---
 

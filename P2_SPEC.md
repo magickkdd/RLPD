@@ -1,6 +1,13 @@
 # P2 规格书 v2：Locomotion 结果 + SACfD/Online 对照
 
 > 版本: 2026-10-17 v2.1（第四轮核查扫尾）· 前置: P0a(G0a ✅) / P1(G1 ✅ 带 V4 复测尾巴) · 上游: REPRODUCTION_PLAN.md v22 · 场地: AMD MI300X 实例
+> **⚠️ v24 范围裁剪（2026-10-18 02:30，用户决策，额度约束触发）**
+> 任务矩阵收缩为 **RLPD 12 runs**（4 任务×3 seeds）：SACfD 12 + Online 12 全部砍掉（已完成的 3 个 SACfD 保留为参考线）。
+   W3 终评只跑 RLPD 12 个（gen_runs --suite p2_final_eval 输出 36 行中 grep "train_finetuning.py"）。
+   **G2-3（RLPD vs SACfD/Online 对照）标注"未复现（范围裁剪）"**；G2-1 绝对线与 G2-2 形状线照常判定。
+> 判据影响：不依赖对照的主判据照常执行；依赖对照/消融的判据标注 **"未复现（范围裁剪）"** 入 NB2。
+> 已完成资产保留：3 个 SACfD halfcheetah seeds（完整跑完，可作附录参考线）；续训体系见 RESUME.md §5.5。
+
 
 ## 0. 定位（v2 修正）
 
