@@ -1,0 +1,10 @@
+# 凭据与敏感文件（永不入库/入 bundle）
+.secrets.env
+deployment/.secrets.env
+bootstrap_ts_filled.sh
+deployment/bootstrap_ts_filled.sh
+*.wandb
+*.tar.gz
+__pycache__/
+*.pyc
+wandb/

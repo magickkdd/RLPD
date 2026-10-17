@@ -1,0 +1,49 @@
+# RLPD ROCm 训练栈（Python 3.11 · MI300X / ROCm 7.2.3）
+# 实测终版（2026-10-17 P0a）：冒烟 9 PASS + 1 SKIP（8-modelscope 可选件，SKIP 合规；JAX_DEVICES [RocmDevice(id=0)]）
+# 关键决策：numpy 锁 2.2.6——jax 0.9.2 需要 numpy>=2（StringDType），
+# mujoco-py cymj 按 numpy2 头文件重编（改版本后必须 rm generated/*.so 重编）
+
+# --- JAX ROCm 四件套（PyPI 同版本 pin；勿用 GitHub release wheel——0.8.x 已删、URL 404）---
+jax==0.9.2
+jaxlib==0.9.2
+jax-rocm7-plugin==0.9.2
+jax-rocm7-pjrt==0.9.2
+
+# --- 神经网络（与 jax 0.9.2 实测配对；flax 0.9.0 太老会挂 partial/module API）---
+flax==0.10.6
+optax==0.2.4
+ml_collections>=0.1.0
+absl-py>=0.12.0
+scipy<1.14
+
+# --- 老 gym / mujoco-py 栈（numpy==2.2.6 见上；版本锁定勿升）---
+numpy==2.2.6
+gym==0.23.1
+mujoco-py==2.1.2.14
+cython<3
+setuptools<66
+wheel
+h5py
+dm_control
+
+# d4rl==1.1（PyPI）：无 python_requires 上限；依赖 pybullet/h5py/dm_control
+# ⚠️ 必须补装 mjrl（d4rl 1.1 的 hand_manipulation_suite 需要，缺它则 mujoco 系 env 不注册）：
+#   仓库 = aravindr93/mjrl（vdek/mjrl、arise-initiative/mjrl 均 404）
+#   实例网络 git clone 不稳：本地下 codeload tarball → scp → pip install --no-deps ./mjrl-master
+d4rl==1.1
+
+# dmcgym（train_finetuning.py 顶层 import 必需）：
+#   分支是 main（master 404）；pip 装它会强行重装 mujoco-py 导致构建失败，
+#   必须 --no-deps --no-build-isolation
+#   pip install --no-deps --no-build-isolation https://codeload.github.com/ikostrikov/dmcgym/tar.gz/refs/heads/main
+# 注：dmcgym 无 PyPI 包，以上为唯一装法
+
+# --- 工具 ---
+wandb>=0.12.14
+tqdm>=4.60.0
+imageio
+moviepy
+
+# 系统依赖（apt，容器重建后需重装）：
+# apt-get install -y libgl1-mesa-dev libglew-dev libosmesa6-dev libegl1 patchelf
+# 符号链接：~/.mujoco/mujoco210 -> /mnt/workspace/mujoco210；LD_LIBRARY_PATH 必须含 ~/.mujoco/mujoco210/bin
