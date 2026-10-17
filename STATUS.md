@@ -52,6 +52,13 @@
 - 本地 `/home/czx/RLPD` 仍为 single source of truth；实例持久盘为二级备份
 - GitHub PAT 仅一次性使用（未写入 .git/config 或文件）；复现结束后建议撤销重建
 
+## 5.4 范围裁剪（10/18 02:30，用户决策）
+
+- **新范围 = 只跑论文主方法 RLPD + 部分任务**：P2 RLPD 4 任务 × 3 seeds（12 runs）+ P3 antmaze-umaze ×3 seeds；**砍掉** SACfD/Online 对照（已完成的 3 个 SACfD 保留不入账）、CDQ 消融 ×6、P6 消融 ×9、P5 Pixels ×7、P4（此前已弹性跳过）
+- 剩余训练时长 **~15h**（原方案 ~60h）；实例额度 45min 时触发此决策
+- 判据影响：G2-1 绝对线（halfcheetah ≥90）与 G2-2 样本效率形状照常判定；G2-3 对比组声明标注"未复现（范围裁剪）"入 NB2
+- 实施细节：runs_p2.txt 替换为 12 行 RLPD 清单（全量 36 行备份于 runs_p2_full36.txt）；旧队列终止时曾出现同种子重复进程事故，已清场并由 master 重开波次（4 run 全部从 ckpt 自动续训：125k/125k/115k/125k）；终评只跑 RLPD 12 个
+
 ## 5.5 续训与自愈能力（10/18 凌晨追加，响应用户"开关实例不可避免"）
 
 - **断点续训**：train_finetuning.py / train_baselines.py 打补丁——启动时检测 `{log_dir}/{exp}/checkpoints` 的最新 ckpt（keep=20，每 5000 步一存）自动 restore 并从该步继续（已用崩溃 run 的 ckpt_125000 做隔离冒烟：`[resume] continue from step 125000` → 干净退出 exit=0）。注：在线 buffer 的已采部分不可恢复，恢复后仅含离线预灌（NB2 声明）
