@@ -1,6 +1,12 @@
 # P6 规格书：消融矩阵（G6）
 
 > 版本: 2026-10-17 v2（v22 扫尾）· 上游: REPRODUCTION_PLAN.md v22 / P2_SPEC.md v2 · 预算: **9 个新 runs ≈ 18 run·h**
+> **⚠️ v24 范围裁剪（2026-10-18 02:30，用户决策，额度约束触发）**
+> **整阶段砍掉（范围裁剪）**，NoLN / Seeded / Symmetric 消融全部不跑。
+   **G6 两判据标注"未复现（范围裁剪）"**；claim 2（Seeded vs Symmetric）与 claim 3 的 LN 消融面在报告中如实标注。
+> 判据影响：不依赖对照的主判据照常执行；依赖对照/消融的判据标注 **"未复现（范围裁剪）"** 入 NB2。
+> 已完成资产保留：3 个 SACfD halfcheetah seeds（完整跑完，可作附录参考线）；续训体系见 RESUME.md §5.5。
+
 
 ## 1. 判据（G6，不得放宽）
 1. LN off vs on：**expert locomotion 上 no-LN 曲线劣于 LN（样本效率与终值）**——复现对象 = **Fig.19**（A.3 expert 数据消融，"LayerNorm can marginally help both sample efficiency and asymptotic performance"，论文 L558；legend 含 no LN）；**claim 3 的 Fig.2/Fig.7 域（AntMaze Large Play / Pen Sparse / Adroit / Humanoid）不在矩阵，如实标注"未覆盖"（v21 修正）**

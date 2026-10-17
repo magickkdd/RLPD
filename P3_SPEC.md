@@ -1,6 +1,13 @@
 # P3 规格书：AntMaze + CDQ 消融（G3）
 
 > 版本: 2026-10-17 v2（v22 扫尾）· 上游: REPRODUCTION_PLAN.md v22 / P2_SPEC.md v2 · 预算: **9 runs ≈ 30 run·h**
+> **⚠️ v24 范围裁剪（2026-10-18 02:30，用户决策，额度约束触发）**
+> 任务矩阵收缩为 **umaze ×3 seeds（3 runs ≈ 4.6h）**：large-diverse 的 CDQ 消融 6 runs 砍掉。
+   **G3-2（CDQ 开 vs 关方向）标注"未复现（范围裁剪）"**；G3-1（umaze 成功率从 0 上升）照常判定。
+   gen_runs --suite p3 输出 9 行中只跑 RLPD/umaze 3 行；终评同理。
+> 判据影响：不依赖对照的主判据照常执行；依赖对照/消融的判据标注 **"未复现（范围裁剪）"** 入 NB2。
+> 已完成资产保留：3 个 SACfD halfcheetah seeds（完整跑完，可作附录参考线）；续训体系见 RESUME.md §5.5。
+
 
 ## 1. 判据（G3，不得放宽）
 1. ≥1 个 AntMaze 任务成功率从 ~0 上升（学习发生）——umaze 主结果

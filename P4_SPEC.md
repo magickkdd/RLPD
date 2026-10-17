@@ -1,6 +1,12 @@
 # P4 规格书：Adroit（G4）
 
 > 版本: 2026-10-17 v2（v22 扫尾）· 上游: REPRODUCTION_PLAN.md v22 · 预算: **1 冒烟 ≈ 0.2 run·h**（结果级 = 弹性，不入验收门）
+> **⚠️ v24 范围裁剪（2026-10-18 02:30，用户决策，额度约束触发）**
+> **阶段已收口（10/17 22:15）**：G4 冒烟通过（mj_envs 装机 + pen-cloned 转换 npy 链路 1k 步 exit=0，critic_loss/eval 有数；数据为稠密奖励转换件，仅验链路）。
+   结果级（弹性项）确认**不跑**（AWAC 原始数据不可得 + 范围裁剪）。
+> 判据影响：不依赖对照的主判据照常执行；依赖对照/消融的判据标注 **"未复现（范围裁剪）"** 入 NB2。
+> 已完成资产保留：3 个 SACfD halfcheetah seeds（完整跑完，可作附录参考线）；续训体系见 RESUME.md §5.5。
+
 
 ## 1. 判据（G4）
 1. `train_finetuning.py --env_name=pen-binary-v0` 跑通 1k 步（**mj_envs/mjrl/AWAC 依赖链全通**）
