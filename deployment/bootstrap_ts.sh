@@ -10,7 +10,7 @@ sleep 1
 
 # 1) 公钥（agent 本机）
 cat > $P/authorized_key.pub << 'EOF_PUB'
-PUBKEY_PLACEHOLDER
+ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPeI8GbiuJFuXYajFlzIz+WxjR8+xXDHcFYBIOgtmhYb czx@DESKTOP-E93227A
 EOF_PUB
 chmod 600 $P/authorized_key.pub
 
