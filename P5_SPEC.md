@@ -61,6 +61,7 @@ export XLA_PYTHON_CLIENT_PREALLOCATE=false && export MUJOCO_GL=osmesa && \
 | dm_control/dmcgym numpy2 不兼容 | **高（首跑）** | V5-a 前置；dm_control 侧风险大——按栈修或标"未复现"；**不阻塞其他阶段** |
 | osmesa 渲染吞吐低 | 中 | **env-steps 固定 300k 时渲染总量与 action_repeat 无关**；ar=2（vs 官方 4）使梯度更新 75k→150k 更贵——V5-b 实测定夺 |
 | 数据分片下载/内存 | 中 | 只下 cheetah-run；逐 episode 流式加载确认 |
+| **像素 ckpt 磁盘占用**（pixels 侧 save_checkpoint 无 keep，每 run ~30 份 × CNN ensemble 2-5MB ≈ 100-150MB/run，7 runs ≈ ~1GB） | 低 | status.sh 的 du 输出监控；持久盘 1PB 空间充足；超出预期则在 pixels 脚本 save 处加 keep=20（一处小改） |
 | Online 组挤压额度 | 中 | Online ×3 seeds 视额度弹性（砍到 2 seeds 需 NB 注明） |
 
 ## 8. 批次衔接

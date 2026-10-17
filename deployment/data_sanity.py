@@ -18,6 +18,9 @@ PAIRS = [
     ("hopper-expert-v0", "hopper_expert.hdf5"),
     ("walker2d-expert-v0", "walker2d_expert.hdf5"),
     ("walker2d-medium-replay-v0", "walker_mixed.hdf5"),
+    ("walker2d-medium-v0", "walker2d_medium.hdf5"),
+    ("antmaze-umaze-v2", "Ant_maze_u-maze_noisy_multistart_False_multigoal_False_sparse_fixed.hdf5"),
+    ("antmaze-large-diverse-v2", "Ant_maze_hardest-maze_noisy_multistart_True_multigoal_True_sparse_fixed.hdf5"),
 ]
 
 
@@ -67,11 +70,11 @@ def main():
               "- hopper-expert-v0 RLPD 终值 ≈ 100；walker2d-expert-v0 ≈ 105；halfcheetah-expert-v0 ≈ 100",
               "- REDQ(Online) 在三任务上均有竞争力（论文 A.3：locomotion 纯在线可较快解决）"]
     print("\n".join(lines))
-    if args.out:
-        open(args.out, "w").write("\n".join(lines) + "\n")
-    json_path = (args.out or "P2_BENCHMARK.md").rsplit(".", 1)[0] + ".json"
+    out_md = args.out or "/mnt/workspace/P2_BENCHMARK.md"
+    open(out_md, "w").write("\n".join(lines) + "\n")
+    json_path = (args.out or "/mnt/workspace/P2_BENCHMARK.md").rsplit(".", 1)[0] + ".json"
     json.dump(bench_json, open(json_path, "w"), indent=2, ensure_ascii=False)
-    print(f"\nwrote {args.out} + {json_path}")
+    print(f"\nwrote {out_md} + {json_path}")
 
 
 if __name__ == "__main__":

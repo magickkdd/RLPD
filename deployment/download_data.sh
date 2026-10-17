@@ -16,7 +16,8 @@ BASE=https://hf-mirror.com/datasets/imone/D4RL/resolve/main
 H5PY=/mnt/data/miniforge3/envs/rlpd311/bin/python
 # 格式: <hf-mirror 文件名>:<d4rl URL basename 即本地文件名>
 # 依据 d4rl 1.1 源码: gym_mujoco/__init__.py(L42-168) 与 locomotion/__init__.py(L325-331) 的 dataset_url basename
-for pair in hopper_expert-v2.hdf5:hopper_expert.hdf5 \
+for pair in halfcheetah_expert-v2.hdf5:halfcheetah_expert.hdf5 \
+            hopper_expert-v2.hdf5:hopper_expert.hdf5 \
             walker2d_expert-v2.hdf5:walker2d_expert.hdf5 \
             walker2d_medium_replay-v2.hdf5:walker_mixed.hdf5 \
             walker2d_medium-v2.hdf5:walker2d_medium.hdf5 \

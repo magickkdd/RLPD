@@ -17,23 +17,21 @@ CKPT = "/mnt/workspace/ckpt"
 LOGS = "/mnt/workspace/logs"
 ENV_PRE = (
     f"cd {REPO} && export LD_LIBRARY_PATH=/root/.mujoco/mujoco210/bin:/mnt/workspace/mujoco210/bin:$LD_LIBRARY_PATH"
-    " && export WANDB_MODE=offline && export XLA_PYTHON_CLIENT_PREALLOCATE=false"
+    " && export WANDB_MODE=offline && export XLA_PYTHON_CLIENT_PREALLOCATE=false && export MUJOCO_GL=osmesa"
 )
 SEEDS = [42, 43, 44]
 
 def cmd(script, flags, log, project=None):
-    """按脚本能力分流追加 flag（v22 四个 FATAL 的根因是无差别追加）。"""
-    parts = [ENV_PRE, f"{PY_} {script} {flags}"]
-    if script in ("final_eval.py",):
-        pass  # final_eval 无 project_name/checkpoint_model
-    elif script in ("train_finetuning_pixels.py", "train_baselines_pixels.py"):
-        parts.append(f"--project_name={project}")  # checkpoint 走 --save_dir（已在 flags 里）
-    else:
-        parts.append(f"--project_name={project} --checkpoint_model=True")
-    parts.append(f"> {log} 2>&1")
-    return " && ".join(parts[:-1]) + " " + parts[-1] if False else " ".join(
-        [" && ".join(parts[:-1]), parts[-1]]
-    )
+    """按脚本能力分流追加 flag。
+    v24 修复: v23 把 project/checkpoint flag 作为独立 parts 元素经 && 连接, 运行时变成
+    独立命令段导致 flag 丢失、重定向错位（bash -n 语法合法故自检未拦）。
+    现全部内联到 python 命令段, 重定向紧随其后。"""
+    s = f"{PY_} {script} {flags}"
+    if script != "final_eval.py" and project is not None:
+        s += f" --project_name={project}"
+    if script != "final_eval.py" and script not in ("train_finetuning_pixels.py", "train_baselines_pixels.py"):
+        s += " --checkpoint_model=True"
+    return " && ".join([ENV_PRE, f"{s} > {log} 2>&1"])
 
 def exp_prefix(seed, ln):
     return f"s{seed}_0pretrain" + ("_LN" if ln else "")
@@ -168,11 +166,18 @@ SUITES = {
 }
 
 def selfcheck(cmds, expect, out):
-    """真自检：期望行数断言 + bash -n 全行语法检查（v23：行数正确 ≠ 可运行）。"""
+    """真自检：行数断言 + bash -n + 语义断言（v24：bash -n 抓不住段级 && 误接）。"""
     assert len(cmds) == expect, f"行数 {len(cmds)} != 期望 {expect}"
     for i, c in enumerate(cmds):
         r = subprocess.run(["bash", "-n"], input=c, text=True, capture_output=True)
         assert r.returncode == 0, f"第 {i+1} 行 bash 语法错误: {r.stderr[:200]}"
+        assert " > /mnt/workspace/logs/" in c, f"第 {i+1} 行缺日志重定向"
+        if "final_eval.py" in c:
+            assert "--project_name" not in c and "--checkpoint_model" not in c, f"第 {i+1} 行 final_eval 不应带 project/ckpt flag"
+        elif "pixels" in c:
+            assert "--project_name=" in c and "--save_dir=" in c and "--checkpoint_model" not in c, f"第 {i+1} 行 pixels flag 错"
+        else:
+            assert "--project_name=" in c and "--checkpoint_model=True > /mnt/workspace/logs/" in c,                 f"第 {i+1} 行 project/ckpt flag 未内联到重定向前（v23 bug 回归）"
 
 def main():
     ap = argparse.ArgumentParser()

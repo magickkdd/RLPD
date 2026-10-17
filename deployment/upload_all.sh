@@ -20,7 +20,7 @@ SCP deployment/env.sh deployment/requirements-rocm.txt deployment/smoke_test.py 
     deployment/download_data.sh deployment/data_sanity.py \
     "root@$IP:/mnt/workspace/deployment/"
 # 规格与文档
-SCP CONNECT.md deployment/CONNECT.md deployment/RESUME.md \
+SCP deployment/CONNECT.md deployment/RESUME.md \
     P2_SPEC.md P3_SPEC.md P4_SPEC.md P5_SPEC.md P6_SPEC.md P7_SPEC.md \
     REPRODUCTION_PLAN.md "root@$IP:/mnt/workspace/"
 echo "=== 上传完成，实例侧真校验（ast.parse + 每脚本 --help 抓 unknown flag + bash -n） ==="
@@ -29,10 +29,16 @@ ssh -i ~/.ssh/id_ed25519 -p 2222 \
   -o StrictHostKeyChecking=no "root@$IP" '
 set -e
 cd /mnt/workspace/rlpd
+mkdir -p /mnt/workspace/logs /mnt/workspace/ckpt
 PY=/mnt/data/miniforge3/envs/rlpd311/bin/python
-for f in train_baselines.py final_eval.py train_baselines_pixels.py; do
+for f in train_finetuning.py train_baselines.py train_baselines_pixels.py final_eval.py train_finetuning_pixels.py; do
   python3 -c "import ast; ast.parse(open(\"/mnt/workspace/rlpd/$f\").read())"
-  $PY $f --help > /dev/null 2>&1 && echo "  $f --help OK" || { echo "  $f --help FAIL"; exit 1; }
+  # absl --help 退出码恒为 1（输出帮助文本），判定依据 = 输出含 flag 定义（unknown flag 时报 FATAL 无此输出）
+  if $PY /mnt/workspace/rlpd/$f --help 2>&1 | grep -q -- "--env_name"; then
+    echo "  $f flags OK"
+  else
+    echo "  $f flags FAIL"; exit 1
+  fi
 done
 for f in /mnt/workspace/deployment/gen_runs.py /mnt/workspace/deployment/aggregate.py /mnt/workspace/deployment/data_sanity.py; do
   python3 -c "import ast; ast.parse(open(\"$f\").read())"
