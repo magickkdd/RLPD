@@ -73,6 +73,15 @@
 - 实例日志快照已同步本地 instance_logs/；RESUME.md 已更新为恢复手册
 - 开机恢复 = 用户跑一次 bootstrap_ts.sh，其余全自动（master 续波 + 断点续训）
 
+## 5.7 踩坑记录（10/18 新实例恢复战役，已同步项目记忆）
+
+1. **同 seed 双写事故**：多代波次孤儿进程互踩 → 干预后必须全量清场（master+xargs+train 三类）再单点重启，核对 /proc 真实 python 进程（排除 bash 包装假计数）
+2. **启动风暴 segfault**：本台 GPU 扛不住 4 路同时 XLA 初始化（dmesg runlist 风暴可定性），守护 v3 改 90s 错峰启动；osmesa 异构任务绝不与 fleet 并存
+3. **巡检正则漏报**：续训 run 的 tqdm 分母=剩余步数（65001），固定 /200001 全漏报误判"未出步"
+4. **数据落位**：旧实例数据放非持久位置随实例消失；download_data.sh 自带软链断言+重下，新实例开机必须先跑
+5. **apt 系统库设计上每次开机要装**（libgl1-mesa/glew/osmesa6/egl1/patchelf），conda+cymj 编译缓存在持久盘免重装
+6. **pkill 自匹配**（SSH 255 真凶）、**多层引号剥解**（复杂命令一律文件化执行）、**hf CLI 无视 HF_ENDPOINT**（curl 直抓 hf-mirror）、**公钥占位符覆盖**（bootstrap 公钥直填入库）——细节见项目记忆 Lessons Learned
+
 ## 6. 待办
 
 **用户侧**
