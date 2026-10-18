@@ -1,29 +1,39 @@
-# RESUME — 实例重启恢复手册（2026-10-18 10:25 关机前终态 · 8h 实例）
+# RESUME — 实例重启恢复手册（2026-10-19 03:42 关机前终态 · v26 修复版重跑中）
 
 ## 关机时状态（持久盘 /mnt/workspace，重启不丢）
-- 范围：RLPD-only 15 runs（P2 12 + P3 umaze 3）
-- **P2 已完成 4/12**：halfcheetah s42/s43/s44 + hopper s42（200k 干净退出）
-- 其余 8 个 run 全部有 ckpt（平均 ~168k/200k）：
-  - hopper s43 @150k / s44 @195k
-  - walker2d-expert s42 @195k / s43 @195k / s44 @125k
-  - walker2d-medium-replay s42 @125k / s43 @125k / s44 @125k
-- 剩余训练量 ≈ 440k 步 ≈ **2.5h**（4 路）
+- **代码已修复（v26 核心）**：`rlpd/rlpd/distributions/tanh_transformed.py` 已加 tfp 缓存语义（`_y_cache`）——15/15 猝死根因的修复，**不可回退到旧版**（备份在 /mnt/workspace/tanh_transformed.py.bak_v25）
+- **v26 重跑（ckpts 在 /mnt/workspace/ckpt/p2_v26/RLPD/）**，队列日志 /mnt/workspace/rerun26.log：
+  - halfcheetah s42 ✅ 200k（125k=95.59 平台）/ s43 ✅ 200k（97.29）/ s44 ✅（~02:35 完成，80k 已 95.25）
+  - hopper s42 ✅（~03:07 完成）
+  - walker2d s42：关机时 ~65k+ 步带 ckpt（03:07 起跑）
+  - **未开始**：hopper s43/s44、walker2d s43/s44、walker2d-medium-replay s42/s43/s44（**max_steps=250000**，队列脚本已修）
+- 旧批次的 12 run（死策略）在 ckpt/p2/RLPD/，仅作证据，勿用于终评
+- 训练日志：/mnt/workspace/logs/v26_*.log；wandb 离线：/mnt/workspace/rlpd/wandb/（本地+GitHub 有备份）
 
 ## 开机后步骤（网页终端，共 3 步）
-1. `bash /mnt/workspace/.remote-access/bootstrap_ts.sh`（tailscale + sshd + 自动拉起守护）
-2. `apt-get install -y -qq libgl1-mesa-dev libglew-dev libosmesa6-dev libegl1 patchelf`（系统库，每次开机必装）
-3. `ln -sfn /mnt/workspace/.d4rl /root/.d4rl; mkdir -p /root/.mujoco && ln -sfn /mnt/workspace/mujoco210 /root/.mujoco/mujoco210`（软链）
+1. `bash /mnt/workspace/.remote-access/bootstrap_ts.sh`（tailscale + sshd；若实例重建过，IP 可能变化需同步本地 SSH 命令）
+2. `apt-get install -y -qq libgl1-mesa-dev libglew-dev libosmesa6-dev libegl1 patchelf`（每次开机必装）
+3. `ln -sfn /mnt/workspace/.d4rl /root/.d4rl; mkdir -p /root/.mujoco && ln -sfn /mnt/workspace/mujoco210 /root/.mujoco/mujoco210`
 
-守护自动：等 bootstrap 完成后 5 分钟内开波 → 断点续训剩余 8 run → 12/12 后写 W2_ALL_COMPLETE。
+## 恢复队列（SSH 或网页终端执行，串行单进程，勿并发）
+```bash
+# 队列脚本已带 ckpt 自动续训（train_finetuning 检测最新 ckpt 接续）；
+# mr 的 250k 用 MS 环境变量；已完成 run 由 ckpt 存在性自然跳过续跑开销（从 200k ckpt 恢复后立即到步退出）
+# 注意：脚本按顺序全量重列，已完成 run 会"restore→即刻退出"秒过
+nohup bash /mnt/workspace/rerun26_queue.sh > /mnt/workspace/logs/rerun26_resume.log 2>&1 &
+```
+- 已完成 run（hc 42/43/44、hopper 42）会秒级跳过；从 walker2d s42 的 ckpt 接续
+- 速率 ~70 steps/s，每 200k ≈ 31 分钟；剩余 7 run + mr 250k×3 ≈ 4.5h
 
 ## 恢复后剩余工作
-1. 等 12/12（~2.5h）
-2. 终评：bash /mnt/workspace/w3_launch.sh（RLPD-only 12 个，已预部署）
-3. aggregate --suite p2 → P2_RESULTS.md → G2 判定
-4. P3 umaze ×3（runs_p3.txt 取 umaze 3 行，~4.6h）→ p3_final_eval
-5. P7 报告（对比声明标"范围裁剪"；SACfD 3 seeds 白送对照入附录）
+1. 等 v26 12/12（~4.5h）
+2. 终评：final_eval.py（**用 --ckpt_step 或默认最新 ckpt**；注意 TF 先行 import 已内置）100 集 ×12
+3. aggregate → P2_RESULTS.md → G2 判定（hc ≥90 三 seed 已实证 95+，预期 PASS）
+4. P3 umaze ×3（spec 未变，代码已修复版）→ G3
+5. P7 报告：NB2 必须写明 v26 修复（tfp 缓存语义）与并发批次猝死的完整偏差链（STATUS §5.10-5.13）
 
 ## 已知坑（详见项目记忆 Lessons Learned）
-- 新实例：openssh-server 要装、authorized_key.pub 用直填真钥的 bootstrap（已修）
-- 数据：~/.d4rl 软链断了会读空 → 若 find 不到 hdf5 先跑 download_data.sh 重下（~2min）
-- 波次启动风暴：守护已是 v3 错峰版（90s），勿手动同启多 run
+- 新实例：openssh-server 要装；数据软链断了跑 find 验证 + download_data.sh
+- **勿并发**：本机 GPU 初始化撞车（一波启动后零新进程）；训练串行最快（70 vs 4路聚合 54.5 steps/s）
+- 终评前确认 `import tensorflow` 在 flax.checkpoints 之前（final_eval.py 已内置）
+- wandb 曲线提取用 tools/q_curves_extract.py（注意按 env 匹配 REF，勿跨 env 用系数）
