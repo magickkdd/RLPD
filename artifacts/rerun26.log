@@ -3,3 +3,7 @@
 [01:11:13] START halfcheetah-expert-v0 s43
 [01:45:14] DONE_0 halfcheetah-expert-v0 s43
 [01:45:14] START halfcheetah-expert-v0 s44
+[02:19:15] DONE_0 halfcheetah-expert-v0 s44
+[02:19:15] START hopper-expert-v0 s42
+[02:52:13] DONE_0 hopper-expert-v0 s42
+[02:52:13] START walker2d-expert-v0 s42
