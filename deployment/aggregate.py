@@ -123,50 +123,71 @@ def g2_judge(agg, curves_summary=None, tasks=None):
 
 
 def _split_records(raw: bytes):
-    off, recs = 0, []
-    while off + 4 <= len(raw):
-        ln = int.from_bytes(raw[off : off + 4], "little")
-        if ln <= 0 or off + 4 + ln > len(raw):
+    """wandb .wandb 记录帧 = varint 长度前缀 + 内容（v24 实测修正：原固定 4 字节长度假设错误，
+    会把记录切碎导致 _step 与指标分家、配对为空）。"""
+    off, recs, n = 0, [], len(raw)
+    while off < n:
+        ln, shift = 0, 0
+        while off < n:
+            b = raw[off]
+            off += 1
+            ln |= (b & 0x7F) << shift
+            shift += 7
+            if not (b & 0x80):
+                break
+        if ln <= 0 or off + ln > n:
             break
-        recs.append(raw[off + 4 : off + 4 + ln])
-        off += 4 + ln
+        recs.append(raw[off : off + ln])
+        off += ln
     return recs
 
 
 def curves_check(wandb_dir):
     """(step, evaluation/return 原始值) 配对 → 用 REF 表归一化（0~100）后做判据 2。
-    期望条数 = 内层循环步数/eval_interval + 1（P2: max_steps/5000+1 = 41 或 51）。"""
-    pat = re.compile(rb"\x12[\x01-\x7f]([\x20-\x7e]{4,60}?)\x82\x01[\x01-\x7f]([0-9.eE+-]+?)(?=[^0-9.eE+-])")
+    v24: wandb 0.30 离线文件改用锚点字节扫描（datastore API 已随 0.30 移除）。"""
+    RET = b'\x12\x11evaluation/return\x82\x01'
+    STP = b'\x12\x05_step\x82\x01'
+
+    def scan(raw):
+        items = []
+        for kp in (RET, STP):
+            for m in re.finditer(re.escape(kp) + rb'([\x01-\x7f])', raw):
+                ln = m.group(1)[0]
+                v = raw[m.end():m.end() + ln]
+                try:
+                    items.append((m.start(), kp, float(v.decode())))
+                except Exception:
+                    continue
+        return sorted(items, key=lambda t: t[0])
+
+    def pair(raw):
+        rets, cur = [], None
+        for _, kp, v in scan(raw):
+            if kp is STP:
+                cur = v
+            else:
+                rets.append((cur, v))
+        return rets
+
     rows, summary = [], []
     for path in sorted(glob.glob(os.path.join(wandb_dir, "offline-run-*", "run-*.wandb"))):
         raw = open(path, "rb").read()
-        m_env = re.search(rb"--env_name=([\x20-\x7e/._-]+)", raw)
-        m_dir = re.search(rb"--log_dir=([\x20-\x7e/._-]+)", raw)
+        m_env = re.search(rb"--env_name=([\x21-\x7e/._-]+)", raw)
+        m_dir = re.search(rb"--log_dir=([\x21-\x7e/._-]+)", raw)
         m_steps = re.search(rb"--max_steps=(\d+)", raw)
         if not (m_env and m_dir):
             continue
-        env = m_env.group(1).decode()
+        env = re.sub(r"[^a-z0-9-]+$", "", m_env.group(1).decode())
         if env not in REF:
             print(f"[warn] {env} 无 REF 表，跳过曲线归一化（可在 REF dict 补充）")
             continue
         max_steps = int(m_steps.group(1)) if m_steps else 200000
         expect = max_steps // 5000 + 1
-        pairs, cur_step = [], None
-        for rec in _split_records(raw):
-            if b"evaluation/return" not in rec and b"_step" not in rec:
-                continue
-            step_v = None
-            for m in pat.finditer(rec):
-                k, v = m.group(1).decode(), m.group(2).decode()
-                if k == "_step":
-                    step_v = float(v)
-                elif k == "evaluation/return":
-                    pairs.append([step_v, float(v)])
+        pairs = pair(raw)
         if pairs and all(p[0] is None for p in pairs):
             pairs = [[i * 5000, v] for i, (_, v) in enumerate(pairs)]
-        pts = [(int(s), norm(env, v)) for s, v in pairs if s is not None]  # 归一化到 0~100
+        pts = [(int(s), norm(env, v)) for s, v in pairs if s is not None]
         peak50 = max([v for s, v in pts if s <= 50000], default=None)
-        # G6 判据 2 实装（v23）：首次到达 60 分（0~100 归一化）所需步数
         step60 = next((st for st, v in pts if v >= 60.0), None)
         rows.append((m_dir.group(1).decode(), env, len(pts), expect, peak50, step60))
         summary.append((env, peak50, step60))
