@@ -97,6 +97,29 @@
 - **抢救方案（执行中）**：① 12 runs × ckpt@50k/150k 健康筛查 ② 各取发散前最后健康 ckpt 做 100 集终评 ③ G2-1 按健康平台判定 + 发散作为偏差如实记录 ④ G2-2 形状线用早期曲线（50k 步内达 60 分）不受影响
 - 终评基建修复沉淀：final_eval.py TF 先行补丁、串行终评执行器（本实例并发初始化必崩）、wandb 0.30 离线解析（锚点扫描）
 
+## 5.10 v25 根因反转：系统性早期猝死（非 GPU 风暴/续训问题）（10/18 晚）
+
+- **筛查矩阵推翻 §5.9 认知**：v2/v3 ckpt 筛查显示 12 run 中 11 个在 ckpt 全窗口（105k~200k）死亡；wandb 训练曲线对质 → **死亡发生在 10k~35k 步（实例 1 干净连续段，早于 segfault 窗口）**——GPU 风暴、续训链路嫌疑全部排除
+- **死亡画像**：walker2d 3 seeds 冲到 78~115 分后 25k~35k 骤死恒定 ~0 分；hopper 爬坡中途死；halfcheetah s42 唯一幸存（98+ 平台，185k 死）；分数恒定 + 无 NaN
+- **验尸（参数级）**：死亡 run 的 **actor 参数范数爆炸 100~180 倍**（17→1761~3117），critic 相对正常（289~1321 vs fresh 89），|log_alpha| 1.5~2.3（α 崩塌）；健康 halfcheetah s42 actor 仅 57.2
+- **q 曲线（wandb 锚点提取）石锤演变链**：hopper s43 @20000 q=308/entropy=−1.2 → @20995 q=1007/entropy=+8.5e23 → entropy 指数爆到 3e24 → 即 **critic 过估计突跳 → actor 追逐 μ 爆炸 → log_std 饱和下 z² 溢出 → entropy 爆炸 → α 崩 → 恒定垃圾策略**
+- **排除清单（逐项实证）**：数据集（5 个 h5 验尸 return 分布全符合官方画像，hopper norm=108.5/walker 107.1）、代码静态审查（sac_learner/tanh_normal 自实现/mlp LN/ensemble/config/masks 与官方逐一一致）、terminal mask 链路（1−terminal + TimeLimit.truncated 正确）
+- **定性**：JAX 0.8 + MI300 浮点栈下 critic 过估计失控（官方 0.3+tfp 栈未触发）；halfcheetah 独活与 terminate 语义的相关性待查
+- **v25 诊断实验（执行中，4 路错峰 30k 步）**：A=hopper 原样+target_q 插桩、B=hopper+q_clip(1000)、C=walker2d 原样、D=halfcheetah 健康对照；sac_learner.py 无侵入补丁（q_clip 默认 0=行为不变 + target_q_max/min 统计）；判读：B 不死 A 死 → q clip 有效 → 全量重跑带数值稳定化补丁（如实报告偏差）
+- 基建沉淀：tools/data_sanity.py（h5 验尸）、tools/ckpt_autopsy.py（参数验尸）、tools/q_curves_extract.py（多段合并版锚点提取）、train_diag.py（诊断训练器）
+
+## 5.11 v25 诊断判读与串行重跑启动（10/18 深夜）
+
+- **A2/B2 诊断结果（30k 步，串行执行器跑通，零 segfault）**：
+  - **A2（hopper s42 原样）未猝死**：@20000 达 103.9 分（超满分），全程波动存活 30k——同配置历史 run 死于 ~15k
+  - **B2（q_clip±1000）反而崩**：@27500 崩至 0.6——clip 阈值贴正常 q 值（300~430）频繁截断，扰动训练动力学；q_clip 假说否定
+- **根因定性（当前最强假说）**：**并发时序相关的数值差异**——历史 12 run 全部经历 4 路并发训练（MI300 多进程调度浮点行为），A2 为首个单进程串行 run 且存活；与"新进程 XLA 初始化撞死在训进程"的 segfault 模式同源
+- **本台 GPU 稳定形态实证**：一波启动后零新进程才能稳；中途新进程 init 必撞（C@22:07 启动 → A@22:09 segfault）；90s/180s 错峰均不足以保护训练进程 init
+- **单进程吞吐实测 77 steps/s > 4 路聚合 54.5**（GPU 独占 + 编译缓存热）→ 200k 步 ≈ 43 分钟/run，**串行反而更快**
+- **v25 重跑方案（执行中）**：串行队列 rerun_queue.sh，ckpt 新目录 p2_v25（与死 ckpt 隔离、续训兼容），顺序 = hopper s42 → walker2d s42 → halfcheetah s43/s44 → hopper s43 → ...；剩余 run 跨实例续训
+- **G2 判定口径调整（NB2 须声明）**：并发→串行的执行形态变更如实记录；发散/猝死作为偏差记录；halfcheetah s42 保留原 200k 曲线 + 健康 ckpt@150k 终评证据
+- 产物同步：artifacts/（screen 筛查矩阵 ×4、q_curves.json 多段合并版、p2_curves.json）；tools/（验尸/提取三件套）入库 GitHub magickkdd/RLPD
+
 ## 6. 待办
 
 **用户侧**

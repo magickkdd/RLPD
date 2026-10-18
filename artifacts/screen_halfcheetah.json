@@ -1,0 +1,15 @@
+{
+ "halfcheetah-expert-v0/s42": {
+  "150000": 0.985
+ },
+ "halfcheetah-expert-v0/s43": {
+  "150000": -0.026,
+  "100000": "ERR:Matching checkpoint not found: /mnt/work",
+  "50000": "ERR:Matching checkpoint not found: /mnt/work"
+ },
+ "halfcheetah-expert-v0/s44": {
+  "150000": -0.026,
+  "100000": "ERR:Matching checkpoint not found: /mnt/work",
+  "50000": "ERR:Matching checkpoint not found: /mnt/work"
+ }
+}
