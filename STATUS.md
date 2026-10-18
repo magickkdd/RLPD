@@ -82,6 +82,13 @@
 5. **apt 系统库设计上每次开机要装**（libgl1-mesa/glew/osmesa6/egl1/patchelf），conda+cymj 编译缓存在持久盘免重装
 6. **pkill 自匹配**（SSH 255 真凶）、**多层引号剥解**（复杂命令一律文件化执行）、**hf CLI 无视 HF_ENDPOINT**（curl 直抓 hf-mirror）、**公钥占位符覆盖**（bootstrap 公钥直填入库）——细节见项目记忆 Lessons Learned
 
+## 5.8 8h 实例关机前终态（10/18 10:25）
+
+- **P2 = 4/12 完成**（halfcheetah ×3 + hopper s42，200k 干净退出）；8 个 run 带存档 ckpt（hopper s44 / walker2d s42 / s43 已至 195k，各差 ~10 分钟收尾）
+- 剩余训练量 ~440k 步 ≈ 2.5h；错峰波次（v3 守护）已验证可正常续跑
+- 恢复手册 RESUME.md 已更新（开机 3 步：bootstrap → apt 库 → 软链）
+- 新实例战役教训已固化：STATUS §5.7 + 项目记忆 10 条 Lessons Learned
+
 ## 6. 待办
 
 **用户侧**
