@@ -15,6 +15,8 @@ EOF_PUB
 chmod 600 $P/authorized_key.pub
 
 # 2) 标准 OpenSSH sshd @127.0.0.1:2223（host keys 落持久盘）
+# 新系统盘无 sshd 二进制：先确保 openssh-server（每次开机需装，设计如此）
+command -v sshd >/dev/null 2>&1 || apt-get install -y -qq openssh-server
 if [ ! -f $P/ssh-host-keys/ssh_host_ed25519_key ]; then
   ssh-keygen -t ed25519 -f $P/ssh-host-keys/ssh_host_ed25519_key -N '' -C rlpd-mi300
 fi
