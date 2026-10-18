@@ -1,0 +1,17 @@
+{
+ "hopper-expert-v0/s42": {
+  "150000": 0.018,
+  "100000": "ERR:Matching checkpoint not found: /mnt/work",
+  "50000": "ERR:Matching checkpoint not found: /mnt/work"
+ },
+ "hopper-expert-v0/s43": {
+  "150000": 0.007,
+  "100000": "ERR:Matching checkpoint not found: /mnt/work",
+  "50000": "ERR:Matching checkpoint not found: /mnt/work"
+ },
+ "hopper-expert-v0/s44": {
+  "150000": 0.018,
+  "100000": "ERR:Matching checkpoint not found: /mnt/work",
+  "50000": "ERR:Matching checkpoint not found: /mnt/work"
+ }
+}
