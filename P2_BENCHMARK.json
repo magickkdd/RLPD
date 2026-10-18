@@ -1,0 +1,51 @@
+{
+  "halfcheetah-expert-v0": {
+    "file": "halfcheetah_expert.hdf5",
+    "transitions": 1000000,
+    "best_return": 11252.03515625,
+    "best_norm": 92.88802161376304,
+    "fig19_read_ref": 100.0
+  },
+  "hopper-expert-v0": {
+    "file": "hopper_expert.hdf5",
+    "transitions": 1000000,
+    "best_return": 3759.083740234375,
+    "best_norm": 116.12450703363233,
+    "fig19_read_ref": 100.0
+  },
+  "walker2d-expert-v0": {
+    "file": "walker2d_expert.hdf5",
+    "transitions": 1000000,
+    "best_return": 5011.693359375,
+    "best_norm": 109.13577470713676,
+    "fig19_read_ref": 105.0
+  },
+  "walker2d-medium-replay-v0": {
+    "file": "walker_mixed.hdf5",
+    "transitions": 302000,
+    "best_return": 4132.00048828125,
+    "best_norm": 89.97315397856003,
+    "fig19_read_ref": null
+  },
+  "walker2d-medium-v0": {
+    "file": "walker2d_medium.hdf5",
+    "transitions": 1000000,
+    "best_return": 4226.93994140625,
+    "best_norm": 92.04124932432643,
+    "fig19_read_ref": null
+  },
+  "antmaze-umaze-v2": {
+    "file": "Ant_maze_u-maze_noisy_multistart_False_multigoal_False_sparse_fixed.hdf5",
+    "transitions": 1000000,
+    "best_return": 1.0,
+    "best_norm": 100.0,
+    "fig19_read_ref": null
+  },
+  "antmaze-large-diverse-v2": {
+    "file": "Ant_maze_hardest-maze_noisy_multistart_True_multigoal_True_sparse_fixed.hdf5",
+    "transitions": 1000000,
+    "best_return": 1.0,
+    "best_norm": 100.0,
+    "fig19_read_ref": null
+  }
+}
