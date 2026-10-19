@@ -1,0 +1,15 @@
+[13:56:21] P1_START halfcheetah-expert-v0 s42 (to 125k)
+[14:34:57] P1_DONE_0 halfcheetah-expert-v0 s42
+[14:34:57] P2_START halfcheetah-expert-v0 s42 (to 200000)
+[14:57:37] P2_DONE_0 halfcheetah-expert-v0 s42
+[14:57:37] P1_START halfcheetah-expert-v0 s43 (to 125k)
+[15:30:55] P1_DONE_0 halfcheetah-expert-v0 s43
+[15:30:55] P2_START halfcheetah-expert-v0 s43 (to 200000)
+[15:53:17] P2_DONE_0 halfcheetah-expert-v0 s43
+[15:53:17] P1_START halfcheetah-expert-v0 s44 (to 125k)
+[16:25:07] P1_DONE_0 halfcheetah-expert-v0 s44
+[16:25:07] P2_START halfcheetah-expert-v0 s44 (to 200000)
+[16:46:20] P2_DONE_0 halfcheetah-expert-v0 s44
+[16:46:20] P1_START hopper-expert-v0 s42 (to 125k)
+[17:17:34] P1_DONE_0 hopper-expert-v0 s42
+[17:17:34] P2_START hopper-expert-v0 s42 (to 200000)
