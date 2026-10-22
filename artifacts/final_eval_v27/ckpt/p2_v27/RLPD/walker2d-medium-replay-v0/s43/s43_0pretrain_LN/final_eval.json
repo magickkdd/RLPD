@@ -1,0 +1,10 @@
+{
+  "env_name": "walker2d-medium-replay-v0",
+  "seed": 43,
+  "episodes": 100,
+  "ckpt_step": 250000,
+  "return_raw": 5530.18505859375,
+  "length": 1000.0,
+  "normalized_score": 120.43023907023982,
+  "normalized_score_available": true
+}

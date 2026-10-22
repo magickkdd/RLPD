@@ -1,0 +1,5 @@
+0000000000000000000000000000000000000000 c90fd4baf28c9c9ef40a81460a2e395092844f88 czx <czx@DESKTOP-E93227A.localdomain> 1792175134 +0800	branch: Created from HEAD
+c90fd4baf28c9c9ef40a81460a2e395092844f88 a4e5090dac44890839739a32b23485819758f47c czx <czx@local> 1792176733 +0800	commit: ROCm/JAX 0.8 适配: 移除 tfp 依赖，自实现 TanhNormal 分布
+a4e5090dac44890839739a32b23485819758f47c 30701bd423153ef8387ddaa74fa736e5db1bef8e rlpd-repro <rlpd@local> 1792228246 +0800	commit: P2/P5 基线与终评脚本: train_baselines(sacfd/online) + final_eval + pixels online
+30701bd423153ef8387ddaa74fa736e5db1bef8e 0c2bd834b060fc88c2220ecffd76d3f6bb5c36c2 rlpd-repro <czx@DESKTOP-E93227A.localdomain> 1792248665 +0800	commit: final_eval v23: ckpt 缺失硬失败 + latest step 提取修正 + normalized None 兜底
+0c2bd834b060fc88c2220ecffd76d3f6bb5c36c2 f6de87145fc0016598f7692d309b9edbf5958482 rlpd-repro <czx@DESKTOP-E93227A.localdomain> 1792256282 +0800	commit: 断点续训: 启动时自动 restore 最新 ckpt 并接续训练(冒烟验证 125000 续跑通过)

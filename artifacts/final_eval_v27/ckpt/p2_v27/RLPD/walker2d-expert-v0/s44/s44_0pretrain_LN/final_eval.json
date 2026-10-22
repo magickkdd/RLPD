@@ -1,0 +1,10 @@
+{
+  "env_name": "walker2d-expert-v0",
+  "seed": 44,
+  "episodes": 100,
+  "ckpt_step": 200000,
+  "return_raw": 6037.2314453125,
+  "length": 1000.0,
+  "normalized_score": 131.47538666636166,
+  "normalized_score_available": true
+}

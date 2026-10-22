@@ -1,0 +1,10 @@
+{
+  "env_name": "hopper-expert-v0",
+  "seed": 44,
+  "episodes": 100,
+  "ckpt_step": 200000,
+  "return_raw": 2965.444580078125,
+  "length": 804.41,
+  "normalized_score": 91.73914742933096,
+  "normalized_score_available": true
+}
