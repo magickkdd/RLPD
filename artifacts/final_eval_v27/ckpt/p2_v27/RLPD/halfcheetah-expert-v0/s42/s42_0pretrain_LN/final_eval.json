@@ -1,0 +1,10 @@
+{
+  "env_name": "halfcheetah-expert-v0",
+  "seed": 42,
+  "episodes": 100,
+  "ckpt_step": 200000,
+  "return_raw": 12065.2236328125,
+  "length": 1000.0,
+  "normalized_score": 99.437975340898,
+  "normalized_score_available": true
+}

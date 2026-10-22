@@ -149,3 +149,17 @@
 - [ ] aggregate → P2_RESULTS.md → G2 判定（halfcheetah ≥90 绝对线 + 50k 步 60 分形状线 + 对照组如实报告）
 - [ ] P3 9 runs → G3；P5 校准吞吐空闲重测 → 6 runs → G5；P6 9 runs → G6
 - [ ] P7：REPRO_REPORT.md（11 图表三态）+ NB2/文2 → 收尾清单（备份/commit/关实例）
+
+## 5.14 v27 终评与 G2 判定：PASS（10/22 11:10）
+
+- **12/12 训练完成（终点 ckpt 硬验证）**：expert 4 env × 3 seeds 全部 200k、medium-replay ×3 全部 250k；两段式绕窗全程零策略死亡
+- **终评（100 episodes × 12，ckpt@目标步）**：
+  - halfcheetah-expert：99.44 / 95.88 / 104.08 → **mean 99.80**（论文 ~100，几乎完美对齐）
+  - hopper-expert：92.72 / 113.23 / 91.74 → **mean 99.23**（论文 ~100）
+  - walker2d-expert：130.06 / 126.04 / 131.48 → **mean 129.19**（论文 ~105，超出）
+  - walker2d-medium-replay：120.19 / 120.43 / 126.72 → **mean 122.45**
+- **G2-1 绝对线（halfcheetah ≥90）**：三 seeds 全部 ≥95 → **PASS**
+- **G2-2 形状线**：训练曲线 50k 步内达 60 分（wandb 曲线实证）→ PASS
+- **12/12 全部 ≥90 分，无一例外；4/4 env 均值达到或超过论文水平**
+- 事故总账：15/15 猝死（tfp 缓存语义缺失，已修复）→ 130k 死亡窗（11/11 vs 2/2，两段式绕窗）→ sed 运行中改脚本（5 run 假完成，验证清单升级）→ 平台 4 次挂起/关机（ckpt 兜底零损失）——全部有根因记录（§5.9-5.13 + TECH_DECISIONS + TECH_DEEP_DIVE）
+- 产物：artifacts/final_eval_v27/（12 份 100 集 json）+ artifacts/v27_end.tar.gz（训练全量）+ GitHub
