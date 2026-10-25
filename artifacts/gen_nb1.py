@@ -18,7 +18,7 @@ HC_CURVES = {k.split('|')[1][-6:]: v for k, v in hc.items()}
 cells = []
 cells.append(md('''# RLPD 强化学习复现实战 — AMD MI300X (ROCm 7.2.3 + JAX 0.8)
 
-**Efficient Online Reinforcement Learning Fine-Tuning with Offline Data** (Ball et al., ICML 2023) 的完整复现，
+**Efficient Online Reinforcement Learning with Offline Data** (Ball et al., ICML 2023) 的完整复现，
 在魔搭社区免费 AMD MI300X 实例（192GB 显存）上完成 **4 任务 × 3 seeds = 12 个 run 的训练与终评**。
 
 ## 最终结果（100 episodes 终评，d4rl normalized score）

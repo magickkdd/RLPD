@@ -4,7 +4,7 @@
 
 ## 一、为什么要做这件事
 
-RLPD（Efficient Online Reinforcement Learning Fine-Tuning with Offline Data）是离线到在线强化学习微调的代表工作：它证明了**不需要保留离线数据集的副本、只需要对称混合采样**，就能在微调阶段高效利用离线数据。官方实现 pin 在 JAX 0.3.x——一个没有 ROCm 7 wheel 的版本。
+RLPD（Efficient Online Reinforcement Learning with Offline Data）是离线到在线强化学习微调的代表工作：它证明了**不需要保留离线数据集的副本、只需要对称混合采样**，就能在微调阶段高效利用离线数据。官方实现 pin 在 JAX 0.3.x——一个没有 ROCm 7 wheel 的版本。
 
 我们的约束很简单：**只有魔搭社区的免费 AMD MI300X 实例可用**（感谢魔搭与 AMD 的开发者激励计划），而官方代码是为 NVIDIA + JAX 0.3 写的。于是问题变成：JAX 0.3 → 0.8 的大版本跳跃 + NVIDIA → AMD 的硬件迁移，需要付出多少代价？
 
@@ -87,7 +87,7 @@ RLPD 的 actor 输出 tanh-normal 分布，原实现依赖 tfp 的 `TransformedD
 | walker2d-expert | 130.06 | 126.04 | 131.48 | **129.19** | ~105 |
 | walker2d-medium-replay | 120.19 | 120.43 | 126.72 | **122.45** | — |
 
-**12/12 全部 ≥ 90 分，4/4 任务均值达到或超过论文水平。**
+**12/12 全部 ≥ 90 分；4/4 任务均值与论文水平持平或超出（expert 99.23–99.80 vs ~100，walker2d-expert 129.19 vs ~105）。**
 
 ## 七、给同类迁移的建议
 
